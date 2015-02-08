@@ -1,0 +1,157 @@
+To install lubridate...use this command:
+
+install.packages('lubridate')
+
+Use the following command to include the package:
+library(lubridate)
+
+To convert the date/Time format: 2014 1 1 0 1
+fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M")
+
+To add minutes:
+fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M") + minutes(5)
+
+To Subtract two times:
+minutes(fast_strptime("2014 1 1 0 10", format="%Y %m %d %H %M") - fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M"))
+
+#To get Minutes since 1st Jan 2014:
+as.numeric(difftime(fast_strptime("2014 12 20 0 0", format="%Y %m %d %H %M"), fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M"),units="mins"))
+as.numeric(difftime(fast_strptime("2014-12-20 0:0:0", format="%Y-%m-%d %H:%M:%S"), fast_strptime("2014-01-01 09:00:00", format="%Y-%m-%d %H:%M:%S"),units="mins"))
+
+#Some other imp functions to calculate the sanctioned hours/unsanctioned hours
+as.numeric(difftime(fast_strptime("2014-12-20 0:0:0", format="%Y-%m-%d %H:%M:%S"), fast_strptime("2014-01-01 09:38:00", format="%Y-%m-%d %H:%M:%S"),units="hours"))
+as.numeric(as.duration((ymd_hms("2014-01-02 09:00:00")) - (ymd_hms("2014-01-01 08:05:00"))))/(60*60*24)
+
+
+See how many digits you print now with
+getOption("digits")
+
+Change this with, e.g.,
+options(digits=12)
+
+To convert a data.frame row to list:
+as.list(test_toys[1,],all.names=TRUE)
+list(test_toys[1,])
+
+To add some minutes diff to another time/date:
+minutes(fast_strptime("2014 1 1 0 10", format="%Y %m %d %H %M") - fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M")) + fast_strptime("2014 12 1 0 10", format="%Y %m %d %H %M")
+
+Other lubridate functions:
+> date <- fast_strptime("2014 1 1 0 1", format="%Y %m %d %H %M")
+> minute(date)
+[1] 1
+> hour(date)
+[1] 0
+> day(date)
+[1] 1
+> year(date)
+[1] 2014
+> month(date)
+[1] 1
+> minute(date) + 700
+[1] 701
+> date + minutes(60)
+[1] "2014-01-01 01:01:00 UTC"
+> date + hours(700/60)
+Error in validObject(.Object) : 
+  invalid class “Period” object: periods must have integer values
+> 700/60
+[1] 11.66667
+> round(700/60)
+[1] 12
+
+Cond1:
+if (hour(date) < 9) hour(date) <- 9
+
+Cond2:
+if(hour(date1) > 16)  {
+ date1 <- (date1 + days(1))
+ hour(date1) <- 9
+}
+
+-----
+Step 1:
+-----
+
+Read the file to a Data.Frame "toys" using the following command:
+
+toys <- read.csv("toys_rev2.csv",stringsAsFactors=FALSE)
+
+--------
+Step 2: Changing the toys data set
+--------
+1. Add a new column: Earliest_Start_Time (with Date data type). Use the following command:
+
+ toys$Earliest_Start_Time <- fast_strptime(toys$Arrival_time, format="%Y %m %d %H %M",tz="UTC")
+
+2. Change the Earliest_Start_Time to the time within the sactioned hours
+
+#Handling the off hours if order arrives before 9AM
+minute(toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) < 9]) <- 0
+hour(toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) < 9]) <- 9 
+
+#Handling the off hours if the order arrives after 7PM
+toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) >= 19] <- toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) >= 19] + days(1)
+minute(toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) >= 19]) <- 0
+hour(toys$Earliest_Start_Time[hour(toys$Earliest_Start_Time) >= 19]) <- 9 
+
+#To check if the data was massaged properly:
+any(hour(toys$Earliest_Start_Time) >= 19)
+any(hour(toys$Earliest_Start_Time) < 9)
+
+Both must return FALSE
+---------
+Step 3: Building the Elf Data set
+---------
+ElfId <- c(1:900)
+Current_Productivity <- c(rep(1,900))
+The following assignment of Next Available time is NOT getting properly converted to UTC Time zone.
+
+#Next_Available_Time <- c(rep(ymd_hms("2014-01-01 09:00:00",tz="UTC"),900))
+y <- fast_strptime("2014-01-01 09:00:00", format="%Y-%m-%d %H:%M:%S",tz="UTC")
+Next_Available_Time <- rep(y,900)
+
+For ur testing, use the following to update the Elf data:
+test_toys[6,] <- list(5,"2014 1 1 15 10",600,fast_strptime("2014-01-01 15:10:00", format="%Y-%m-%d %H:%M:%S",tz="UTC"))
+
+
+Future_Productivity <- c(rep(1,900))
+Used_Once <- c(rep('N',900))
+Elf <- data.frame(ElfId,Current_Productivity, Next_Available_Time,Future_Productivity,Used_Once,stringsAsFactors=FALSE)
+
+To make sure that there are NO NA values anywhere in a Data Frame, use:
+all(complete.cases(Elf))
+
+If needed use the tz="UTC" option, as shown below:
+test_toys[6,] <- list(6,"2014 1 1 13 1", 600, ymd_hms("2014-01-01 13:01:00",tz="UTC"))
+
+(Building the test_Elf data frame for testing):
+test_Elf <- head(Elf)
+test_Elf$Used_Once[which(test_Elf$Used_Once == "N")[2]] <- "Y"
+test_Elf$Used_Once[which(test_Elf$Used_Once == "N")[3]] <- "Y"
+
+(Building the test_toys data frame for testing):
+test_toys <- head(toys)
+
+To perform sorting, use:
+test_Elf[with(test_Elf,order(Next_Available_Time, -Future_Productivity)),]
+
+---------------
+Step 4: Code to get Potential Elfs
+---------------
+0. Input is: 
+1. Pick all the Elfs from Elf where Used_Once is Y
+2. If length(Elf[Used_Once == N]) > 0, then pick one more elf which is Never used
+   pick the least ElfId (in this case)
+3. Prepare a Data.Frame with the following details:
+   ElfId 
+   Current_Productivity 
+   Next_Available_Time 
+   Future_Productivity 
+   Used_Once
+4. Return the Data Frame
+
+
+---
+To adjust the time - changing the logic ... deferring the start, if more than 30percent of work lies after work hours
+Toys_Modified$Re_Mod_Again <- ifelse(Toys_Modified$df > 0.3, as.character(Toys_Modified$Next_Day_Begin), as.character(Toys_Modified$Modified_Time))
