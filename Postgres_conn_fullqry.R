@@ -8,22 +8,12 @@ drv <- dbDriver("PostgreSQL")
 
 ## Open a connection
 #con <- dbConnect(drv, dbname="flights")
+
 con <- dbConnect(drv, dbname="flights",host="localhost",port=5432,user="postgres",password="PEPSI@cola27")
 
 ## Submits a statement
-rs <- dbSendQuery(con, "select a.dep_delay, a.year, a.month, a.day,a.hour, b.temp,
-dewp,
-humid,
-wind_dir,
-wind_speed,
-wind_gust,
-precip,
-pressure,
-visib
-from flights a,
-weather b 
-where a.year = b.year and a.month = b.month and a.day = b.day and a.hour = b.hour
-")
+rs <- dbSendQuery(con, "select avg(dep_delay) as dep_delay, avg(arr_delay) arr_delay, carrier from flights group by carrier order by 2 desc"
+)
 
 ## fetch all elements from the result set
 flight_delays <- fetch(rs,n=-1)
