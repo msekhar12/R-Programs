@@ -6,6 +6,7 @@ library("lubridate")
 
 fix(sales)
 
+
 sales$ham.profit.actual <- ifelse(sales$demand.ham >= sales$available.ham, 
                                   ((sales$available.ham * 6.50) - 
                                      (sales$available.ham * 3.50)), 
@@ -18,11 +19,9 @@ sales$ham.profit.missed <- ifelse(sales$demand.ham > sales$available.ham,
                                   0)
 
 
-sales$ham.profit.non_sale_loss <- ifelse(sales$demand.ham < sales$available.ham, 
+sales$ham.non_sale_loss <- ifelse(sales$demand.ham < sales$available.ham, 
                                   ((sales$available.ham - sales$demand.ham) * 3.50), 
                                   0)
-
-
 
 
 sales$turkey.profit.actual <- ifelse(sales$demand.turkey >= sales$available.turkey, 
@@ -36,6 +35,9 @@ sales$turkey.profit.missed <- ifelse(sales$demand.turkey > sales$available.turke
                                      ((sales$demand.turkey - sales$available.turkey) * 6.50), 
                                      0)
 
+sales$turkey.non_sale_loss <- ifelse(sales$demand.turkey < sales$available.turkey, 
+                                     ((sales$available.turkey - sales$demand.turkey) * 4.0), 
+                                     0)
 
 
 sales$veggie.profit.actual <- ifelse(sales$demand.veggie >= sales$available.veggie, 
@@ -46,6 +48,11 @@ sales$veggie.profit.actual <- ifelse(sales$demand.veggie >= sales$available.vegg
 
 sales$veggie.profit.missed <- ifelse(sales$demand.veggie > sales$available.veggie, 
                                      ((sales$demand.veggie - sales$available.veggie) * 5), 
+                                     0)
+
+
+sales$veggie.non_sale_loss<- ifelse(sales$demand.veggie < sales$available.veggie, 
+                                     ((sales$available.veggie - sales$demand.veggie) * 2.5), 
                                      0)
 
 
