@@ -1,0 +1,112 @@
+#606 PROJECT 1
+sales <- read.csv(file="sales.csv", header=TRUE, sep=",")
+library("lubridate")
+
+#To view a data.frame in excel format, use "fix(sales)" command
+
+fix(sales)
+
+sales$ham.profit.actual <- ifelse(sales$demand.ham >= sales$available.ham, 
+                                  ((sales$available.ham * 6.50) - 
+                                     (sales$available.ham * 3.50)), 
+                                  (sales$demand.ham * 6.50) - 
+                                    (sales$available.ham * 3.50))
+
+
+sales$ham.profit.missed <- ifelse(sales$demand.ham > sales$available.ham, 
+                                  ((sales$demand.ham - sales$available.ham) * 6.50), 
+                                  0)
+
+
+sales$ham.profit.non_sale_loss <- ifelse(sales$demand.ham < sales$available.ham, 
+                                  ((sales$available.ham - sales$demand.ham) * 3.50), 
+                                  0)
+
+
+
+
+sales$turkey.profit.actual <- ifelse(sales$demand.turkey >= sales$available.turkey, 
+                                     ((sales$available.turkey * 6.50) - 
+                                        (sales$available.turkey * 4)), 
+                                     (sales$demand.turkey * 6.50) - 
+                                       (sales$available.turkey * 4))
+
+
+sales$turkey.profit.missed <- ifelse(sales$demand.turkey > sales$available.turkey, 
+                                     ((sales$demand.turkey - sales$available.turkey) * 6.50), 
+                                     0)
+
+
+
+sales$veggie.profit.actual <- ifelse(sales$demand.veggie >= sales$available.veggie, 
+                                     ((sales$available.veggie * 5) - 
+                                        (sales$available.veggie * 2.5)), 
+                                     (sales$demand.veggie * 5) - 
+                                       (sales$available.veggie * 2.5))
+
+sales$veggie.profit.missed <- ifelse(sales$demand.veggie > sales$available.veggie, 
+                                     ((sales$demand.veggie - sales$available.veggie) * 5), 
+                                     0)
+
+
+
+
+sales$month <- month(ymd(sales$date))
+sales$day <- day(ymd(sales$date))
+sales$wday <- wday(ymd(sales$date))
+#sales
+#sales_monday <- sales[sales$wday == 2,]
+#sales_tuesday <- sales[sales$wday == 3,]
+#sales_wednesday <- sales[sales$wday == 4,]
+#sales_thursday <- sales[sales$wday == 5,]
+#sales_friday <- sales[sales$wday == 6,]
+
+#demand.ham.avg <- vector(length=nrow(sales_monday))
+#dpois.ham <- vector(length=nrow(sales_monday))
+#qpois.ham <- vector(length=nrow(sales_monday))
+#ppois.ham_rev <- vector(length=nrow(sales_monday))
+
+#for(i in 1:nrow(sales_monday))
+#{
+#  demand.ham.avg[i] <- sum(sales_monday$demand.ham[1:i])/i
+#  #print(sales$demand.ham)
+  
+#  qpois.ham[i] <- qpois(0.6, demand.ham.avg[i],lower.tail = F) 
+#  
+#  
+#}
+
+#print(demand.ham.avg - sales_monday$demand.ham ) 
+#print(qpois.ham) 
+
+#Analyzing complete, not just for monday
+#This looks promising, but 
+
+demand.ham.avg <- vector(length=nrow(sales))
+dpois.ham <- vector(length=nrow(sales))
+qpois.ham <- vector(length=nrow(sales))
+ppois.ham_rev <- vector(length=nrow(sales))
+
+
+
+for(i in 1:nrow(sales))
+{
+  demand.ham.avg[i] <- sum(sales$demand.ham[1:i])/i
+  #print(sales$demand.ham)
+  
+  qpois.ham[i] <- qpois(0.6, demand.ham.avg[i],lower.tail = T) 
+  
+  
+}
+
+print(demand.ham.avg - sales$demand.ham ) 
+print(qpois.ham) 
+print(sales$demand.ham)
+
+print(qpois.ham - sales$demand.ham)
+print(sales$available.ham - sales$demand.ham)
+
+length(qpois.ham[(qpois.ham - sales$demand.ham) > 0] )
+hist(qpois.ham, breaks = 5)
+dummy <- data.frame(qpois=qpois.ham,demand.ham=sales$demand.ham,available.ham=sales$available.ham,demand.ham.avg = demand.ham.avg)
+print(dummy)
