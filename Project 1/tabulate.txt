@@ -1,0 +1,11 @@
+require(MASS)
+ships[1:5,]
+table(ships$type)
+
+table(ships$type,ships$year)
+
+xtabs( ~ type,data = ships)
+xtabs( ~ type + year,data = ships)
+xtabs( ~ type + year + period,data = ships)
+
+prop.table(sn.tab)

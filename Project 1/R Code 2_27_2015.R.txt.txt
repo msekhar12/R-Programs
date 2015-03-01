@@ -1,0 +1,68 @@
+sales
+
+sd(sales$demand.ham)
+mean(sales$demand.ham) - (2 * sd(sales$demand.ham))
+#8.196939
+mean(sales$demand.ham) + (2 * sd(sales$demand.ham))
+#23.69537
+#Consider only the values between 8 to 23, and discard others.
+
+sales.ham <- data.frame()
+sales.ham <- sales
+
+sales.ham$demand.turkey <- NULL
+sales.ham$demand.veggie <- NULL
+sales.ham$available.turkey <- NULL
+sales.ham$available.veggie <- NULL
+sales.ham$demand.ham.avg_1 <- NULL
+sales.ham$demand.ham.avg <- NULL
+ 
+sales.ham$ham.profit.actual <- ifelse(sales.ham$demand.ham >= sales.ham$available.ham, 
+                                  ((sales.ham$available.ham * 6.50) - 
+                                     (sales.ham$available.ham * 3.50)), 
+                                  (sales.ham$demand.ham * 6.50) - 
+                                    (sales.ham$available.ham * 3.50))
+
+
+sales.ham$ham.profit.missed <- ifelse(sales.ham$demand.ham > sales.ham$available.ham, 
+                                  ((sales.ham$demand.ham - sales.ham$available.ham) * 6.50), 
+                                  0)
+
+
+sales.ham$demand.ham.mod <- ifelse(
+  sales.ham$demand.ham >= 8 & sales.ham$demand.ham <= 23, 
+  sales.ham$demand.ham, NA)
+
+
+#We have to find the running average of the demand
+sales.ham$demand.run.avg <- NULL
+sales.ham$demand.mix.avg <- NULL
+sales.ham$demand.run.qpois <- NULL
+sales.ham$demand.mix.qpois <- NULL
+for(i in 2:nrow(sales.ham))
+{
+  sales.ham$demand.run.avg[i] <- mean(sales.ham$demand.ham.mod[1:(i-1)],na.rm=T)
+  sales.ham$demand.mix.avg[i] <- ((sales.ham$demand.run.avg[i] * 0.65) + 
+                                    (ifelse(is.na(sales.ham$demand.ham.mod[i-1]),sales.ham$demand.run.avg[i],sales.ham$demand.ham.mod[i-1]) * 0.35))
+  sales.ham$demand.run.qpois[i] <- qpois(0.5,sales.ham$demand.run.avg[i],lower.tail=F)
+  sales.ham$demand.mix.qpois[i] <- qpois(0.5,sales.ham$demand.mix.avg[i],lower.tail=F)
+}
+
+sales.ham$demand.run.qpois[1] <- 14
+sales.ham$demand.mix.qpois[1] <- 14
+sales.ham
+
+print(sum(ifelse(sales.ham$demand.ham >= sales.ham$demand.run.qpois, 
+                                      ((sales.ham$demand.run.qpois * 6.50) - 
+                                         (sales.ham$demand.run.qpois * 3.50)), 
+                                      (sales.ham$demand.ham * 6.50) - 
+                                        (sales.ham$demand.run.qpois * 3.50))
+))
+
+print(sum(ifelse(sales.ham$demand.ham >= sales.ham$demand.mix.qpois, 
+                 ((sales.ham$demand.mix.qpois * 6.50) - 
+                    (sales.ham$demand.mix.qpois * 3.50)), 
+                 (sales.ham$demand.ham * 6.50) - 
+                   (sales.ham$demand.mix.qpois * 3.50))
+))
+
