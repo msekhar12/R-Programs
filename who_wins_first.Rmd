@@ -1,0 +1,81 @@
+---
+title: "who_wins_first"
+author: "Sekhar Mekala"
+date: "Saturday, March 07, 2015"
+output: html_document
+---
+
+Two people try to toss the same coin.
+The first person, say F starts tossing first, followed by the second person S. Who ever gets N number of heads first, will win. 
+P represents the probability of getting Heads. To call the function 10000 times, and find the probability that the first person wins, use the following function call. In the following example function call, the first parm 0.2 represents the probability of getting HEAD, and 5 represents the required number of getting Heads for the person to win.
+
+mean(replicate(10000,who_wins_first(0.2,5)))
+
+
+
+```{r}
+who_wins_first <- function(P,N)
+{
+  #Two people try to toss the same coin.
+  #The first person, say F starts tossing first, followed by the second person S. Who ever gets N number of heads first, will win
+  #P represents the probability of getting Heads
+
+  #To call the function 10000 times, and find the probability that the first person wins, use the following function call
+  #mean(replicate(10000,who_wins_first(0.2,5)))
+  
+  #HF represents the outcome when first person tosses the coin first
+  HF <- 0
+  HS <- 0
+  repeat
+    {
+       #0 represents tails, 1 represents H, in the following sample function
+       F <- sample(0:1,1)
+       if (F == 1)
+       {
+         HF <- (HF + 1)
+         if (HF == N) 
+           {
+           break
+           }
+       
+       }
+
+    S <- sample(0:1,1)
+    if (S == 1)
+    {
+      HS <- (HS + 1)
+      if (HS == N) 
+      {
+        break
+      }
+      
+    }
+}
+if(HS == HF) return(-1)
+if(HS > HF) return(0)
+if(HS < HF) return(1)
+}
+```
+
+```{r}
+mean(replicate(10000,who_wins_first(0.2,5)))
+mean(replicate(10000,who_wins_first(0.6,10)))
+mean(replicate(10000,who_wins_first(0.2,15)))
+mean(replicate(10000,who_wins_first(0.5,5)))
+mean(replicate(10000,who_wins_first(0.5,10)))
+mean(replicate(10000,who_wins_first(0.5,15)))
+mean(replicate(10000,who_wins_first(0.5,20)))
+mean(replicate(10000,who_wins_first(0.5,30)))
+mean(replicate(10000,who_wins_first(0.5,40)))
+mean(replicate(10000,who_wins_first(0.5,50)))
+mean(replicate(10000,who_wins_first(0.5,60)))
+mean(replicate(10000,who_wins_first(0.2,20)))
+mean(replicate(10000,who_wins_first(0.5,70)))
+```
+
+To find the variance or standard deviation of the probability, use the following function call:
+```{r}
+mean(replicate(10000,who_wins_first(0.5,5)))
+sd(replicate(10000,who_wins_first(0.5,5)))
+var(replicate(10000,who_wins_first(0.5,5)))
+```

@@ -1,0 +1,67 @@
+---
+title: "Example_4.42"
+author: "Sekhar Mekala"
+date: "Wednesday, March 04, 2015"
+output: html_document
+---
+Example 4.42, finding the probability of X, given Y=1. 
+Example from Doborow book
+
+```{r}
+example_4_42 <- function(n,y)
+{
+
+# n - represents the number of trials desired
+# y - represents the value of y, for which you would like to obtain the conditional probability  
+# For example, to get the conditional probability distribution of X, when y = 1, use the following call:
+# example_4_42(10000,1)
+  
+ctr <- 0
+p <- vector(length=n)
+ repeat{
+   x <- sample(1:4,1)
+   y_sample <- sample(1:x,1)
+   
+   
+   if(y_sample == y)
+   {
+
+     ctr <- (ctr+1)
+     p[ctr] <- x     
+     if (ctr == n)
+     {
+       p_1 <- (sum(p == 1) / n)
+       p_2 <- (sum(p == 2) / n)
+       p_3 <- (sum(p == 3) / n)
+       p_4 <- (sum(p == 4) / n)
+       return(list(p_1=p_1,p_2=p_2,p_3=p_3,p_4=p_4))
+       
+     }
+   }
+ }
+
+}
+
+example_4_42(10000,1)
+```
+
+The above program call, returns that X=1 has the maximum probability (which is 0.4858). I am not sure why the author wants to find the expected value
+
+Let us make another call to the function, this time, let us find the probability distributions of X, given y=4
+
+Getting the P(X = x | y = 4)
+```{r}
+example_4_42(10000,4)
+```
+
+Getting the P(X=x | y = 3)
+
+```{r}
+example_4_42(10000,3)
+```
+
+Getting the P(X=x | y = 2)
+
+```{r}
+example_4_42(10000,2)
+```
