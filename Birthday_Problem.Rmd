@@ -1,0 +1,47 @@
+---
+title: "Birthday_Problem"
+author: "Sekhar Mekala"
+date: "Tuesday, April 07, 2015"
+output: html_document
+---
+
+If we have K balls, and M boxes, and you start throwing balls randomly onto boxes, then the probability that a box contains more than one ball is given by:
+
+**$$ 1 -  e^\frac{-K^2}{2M} $$**
+
+* If 50 people gather in a room, what is the probability that at least 3 have the same birthday?
+```{r}
+mean(replicate(10000, 3 %in% table(sample(1:365,50,replace=T))))
+```
+
+
+* If 50 people gather in a room, what is the probability that at least 2 have the same birthday?
+```{r}
+mean(replicate(10000, 2 %in% table(sample(1:365,50,replace=T))))
+```
+
+*How many people are needed in a room so that at least 3 of them have the same birthday with 95% probability.
+Let us write a generalized function for this purpose. The function accepts the required number of people and probability, and number of days in the year as inputs:
+
+```{r}
+birthday_min_ppl <- function(n,p,d)
+  {
+  
+  i <- 2
+  
+  repeat 
+    {
+    if(mean(replicate(1000, n %in% table(sample(1:d,i,replace=T)))) >= p) return(i)
+    i <- (i+1)
+    }
+  
+  }
+
+#If 3 or more people to have the same birthday (with 50% prob.), how many people are needed in the room?
+birthday_min_ppl(3,.5,365)
+
+#If 2 or more people to have the same birthday (with 95% prob.), how many people are needed in the room?
+birthday_min_ppl(2,.95,365)
+```
+
+So we need approximately 90 people if 3 people to have the same birthday with 50% probability. We need 50 people if two or more people to have the same Birthday with 95% probability
